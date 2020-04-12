@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage;
+using Ripl.EF.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Ripl.EF
 {
-    public abstract class Repository<TContext>
+    public abstract class CommandRepository<TContext> : ICommandRepository, IDisposable
         where TContext : DbContext
     {
         private bool _disposed = false;
@@ -23,7 +24,7 @@ namespace Ripl.EF
             }
         }
 
-        public Repository(TContext dataContext)
+        public CommandRepository(TContext dataContext)
         {
             _dataContext = dataContext;
         }
@@ -37,50 +38,7 @@ namespace Ripl.EF
             return result?.Entity;
         }
 
-        public async Task<IQueryable<TEntity>> GetAllAsync<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class
-        {
-            var dbSet = _dataContext.Set<TEntity>();
-
-            if (dbSet == null) return null;
-
-            var result = dbSet.AsNoTracking().Where(predicate);
-
-            return result;
-        }
-
-        public async Task<TEntity> GetEntityAsync<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class
-        {
-
-            var dbSet = _dataContext.Set<TEntity>();
-
-            if (dbSet == null) return null;
-
-            var result = await dbSet.AsNoTracking().FirstOrDefaultAsync<TEntity>(predicate);
-            return result;
-        }
-
-        public async Task<bool> FindAnyEntityAsync<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class
-        {
-            var dbSet = _dataContext.Set<TEntity>();
-
-            if (dbSet == null) return false;
-
-            var result = await dbSet.AsNoTracking().AnyAsync(predicate);
-
-            return result;
-        }
-
-        public IEnumerable<TEntity> SearchBy<TEntity>(Func<TEntity, bool> predicate) where TEntity : class
-        {
-            var dbSet = _dataContext.Set<TEntity>();
-
-            if (dbSet == null)
-                return null;
-
-            var result = dbSet.AsNoTracking().Where(predicate);
-
-            return result;
-        }
+        
 
         public TEntity UpdateEntityAsync<TEntity>(TEntity entity) where TEntity : class
         {
@@ -94,7 +52,7 @@ namespace Ripl.EF
 
         }
 
-        public async Task<bool> Save()
+        public async Task<bool> Save(bool dispose = false)
         {
             int changes = 0;
 
@@ -116,8 +74,10 @@ namespace Ripl.EF
                 }
                 finally
                 {
-
-                    Dispose();
+                    if (dispose)
+                    {
+                        Dispose();
+                    }   
                 }
             }
             return (changes > 0 ? true : false);
