@@ -3,9 +3,9 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>1.3.3.0</AssemblyVersion>
-    <FileVersion>1.3.3.0</FileVersion>
-    <Version>1.3.3</Version>
+    <AssemblyVersion>1.4.0.0</AssemblyVersion>
+    <FileVersion>1.4.0.0</FileVersion>
+    <Version>1.4.0</Version>
     <Authors>Bien Toribio</Authors>
     <Company>bien.to</Company>
     <RepositoryUrl>https://github.com/biento/Ripl.EF</RepositoryUrl>
@@ -13,6 +13,9 @@
     <PackageLicenseFile></PackageLicenseFile>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <Description>Provides an abstraction to the EntityFramework Core Classes</Description>
+    <PackageReleaseNotes>- Changed access modifiers for methods for extensibility.
+- Added xml documents for readability.
+- Temporarily removed ExecuteCommand and ExecuteQuery.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
