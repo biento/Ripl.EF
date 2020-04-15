@@ -16,14 +16,27 @@ namespace Ripl.EF
         private bool _disposed = false;
         private readonly TContext _dataContext;
 
+        protected virtual TContext DataContext
+        {
+            get
+            {
+                return _dataContext;
+            }
+        }
+
+        public QueryRepository(TContext dataContext)
+        {
+            _dataContext = dataContext;
+        }
+
         /// <summary>
         /// Retrieves records that with applied predicate filter.
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
-        /// <param name="predicate">Condition used to filter records. Default is null, in which case it will return all records.</param>
+        /// <param name="predicate">Function to filter entities. Default is null, in which case it will return all records.</param>
         /// <param name="trackChanges">If true then returned results are tracked on the datacontext. Default is false.</param>
         /// <returns></returns>
-        public async Task<IQueryable<TEntity>> GetAllAsync<TEntity>(Expression<Func<TEntity, bool>> predicate = null, bool trackChanges = false) where TEntity : class
+        public virtual async Task<IQueryable<TEntity>> GetAllAsync<TEntity>(Expression<Func<TEntity, bool>> predicate = null, bool trackChanges = false) where TEntity : class
         {
             var dbSet = _dataContext.Set<TEntity>();
             if (dbSet == null)
@@ -40,7 +53,13 @@ namespace Ripl.EF
             return result;
         }
 
-        public async Task<TEntity> GetEntityAsync<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        /// <summary>
+        /// Get record that satisfies the condition in the specified filter.
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="predicate">Function used to filter records.</param>
+        /// <returns></returns>
+        public virtual async Task<TEntity> GetEntityAsync<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class
         {
 
             var dbSet = _dataContext.Set<TEntity>();
@@ -51,7 +70,13 @@ namespace Ripl.EF
             return result;
         }
 
-        public async Task<bool> FindAnyEntityAsync<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        /// <summary>
+        /// Determines whether any record satisfies the specified condition.
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="predicate">Function used to filter records.</param>
+        /// <returns></returns>
+        public virtual async Task<bool> FindAnyEntityAsync<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class
         {
             var dbSet = _dataContext.Set<TEntity>();
 
@@ -60,38 +85,7 @@ namespace Ripl.EF
             var result = await dbSet.AsNoTracking().AnyAsync(predicate);
 
             return result;
-        }
-
-        public IEnumerable<TEntity> SearchBy<TEntity>(Func<TEntity, bool> predicate) where TEntity : class
-        {
-            var dbSet = _dataContext.Set<TEntity>();
-
-            if (dbSet == null)
-                return null;
-
-            var result = dbSet.AsNoTracking().Where(predicate);
-
-            return result;
-        }
-
-        public IEnumerable<TEntity> ExecuteQuery<TEntity>
-            (
-                string command, 
-                bool trackChanges = false, 
-                params object[] parameters
-            ) 
-            where TEntity : class
-        {
-            var dbSet = _dataContext.Set<TEntity>();
-
-            if (dbSet == null)
-                return null;
-
-            var result = trackChanges ? dbSet.AsTracking().FromSql<TEntity>(command, parameters)
-                : dbSet.AsNoTracking().FromSql<TEntity>(command, parameters);
-
-            return result;
-        }
+        }        
 
         /// <summary>
         /// Defered filtering on a queryable collection based on a property
@@ -103,7 +97,7 @@ namespace Ripl.EF
         /// <param name="parameterName">Name of the parameter.</param>
         /// <param name="value">Value to be searched in the collection.</param>
         /// <returns>IQueryable<typeparamref name="TEntity"/></returns>
-        public IQueryable<TEntity> FilterBy<TEntity>(IQueryable<TEntity> queryableCollection, string parameterName, object value)
+        public virtual IQueryable<TEntity> FilterBy<TEntity>(IQueryable<TEntity> queryableCollection, string parameterName, object value)
          where TEntity : class
         {
             // get the type of entity            
