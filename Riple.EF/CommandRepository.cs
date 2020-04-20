@@ -37,13 +37,14 @@ namespace Ripl.EF
         /// <returns></returns>
         public virtual TEntity AddEntity<TEntity>(TEntity entity) where TEntity : class
         {
+
             EntityEntry<TEntity> result;
 
             result = _dataContext.Add(entity);
 
             return result?.Entity;
         }
-                
+
         /// <summary>
         /// Track the modified entity. Updates will later be committed to the database on Save.
         /// </summary>
@@ -70,7 +71,7 @@ namespace Ripl.EF
         public virtual async Task<bool> Save(bool dispose = false)
         {
             int changes = 0;
-
+            
             using (IDbContextTransaction _transaction = await _dataContext.Database.BeginTransactionAsync().ConfigureAwait(false))
             {
                 try
@@ -91,9 +92,10 @@ namespace Ripl.EF
                     if (dispose)
                     {
                         Dispose();
-                    }   
+                    }
                 }
             }
+
             return (changes > 0 ? true : false);
         }
 
