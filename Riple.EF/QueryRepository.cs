@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Ripl.EF
 {
-    public abstract class QueryRepository<TContext> : IQueryRepository
+    public abstract class QueryRepository<TContext> : IDisposable
         where TContext : DbContext
     {
         private bool _disposed = false;
@@ -36,7 +36,7 @@ namespace Ripl.EF
         /// <param name="predicate">Function to filter entities. Default is null, in which case it will return all records.</param>
         /// <param name="trackChanges">If true then returned results are tracked on the datacontext. Default is false.</param>
         /// <returns></returns>
-        public virtual async Task<IQueryable<TEntity>> GetAllAsync<TEntity>(Expression<Func<TEntity, bool>> predicate = null, bool trackChanges = false) where TEntity : class
+        protected virtual async Task<IQueryable<TEntity>> GetAllAsync<TEntity>(Expression<Func<TEntity, bool>> predicate = null, bool trackChanges = false) where TEntity : class
         {
             var dbSet = _dataContext.Set<TEntity>();
             if (dbSet == null)
@@ -59,7 +59,7 @@ namespace Ripl.EF
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="predicate">Function used to filter records.</param>
         /// <returns></returns>
-        public virtual async Task<TEntity> GetEntityAsync<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        protected virtual async Task<TEntity> GetEntityAsync<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class
         {
 
             var dbSet = _dataContext.Set<TEntity>();
@@ -76,7 +76,7 @@ namespace Ripl.EF
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="predicate">Function used to filter records.</param>
         /// <returns></returns>
-        public virtual async Task<bool> FindAnyEntityAsync<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        protected virtual async Task<bool> FindAnyEntityAsync<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class
         {
             var dbSet = _dataContext.Set<TEntity>();
 
@@ -97,7 +97,7 @@ namespace Ripl.EF
         /// <param name="parameterName">Name of the parameter.</param>
         /// <param name="value">Value to be searched in the collection.</param>
         /// <returns>IQueryable<typeparamref name="TEntity"/></returns>
-        public virtual IQueryable<TEntity> FilterBy<TEntity>(IQueryable<TEntity> queryableCollection, string parameterName, object value)
+        protected virtual IQueryable<TEntity> FilterBy<TEntity>(IQueryable<TEntity> queryableCollection, string parameterName, object value)
          where TEntity : class
         {
             // get the type of entity            
