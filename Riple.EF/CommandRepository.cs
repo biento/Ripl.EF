@@ -16,7 +16,7 @@ namespace Ripl.EF
         private bool _disposed = false;
         private readonly TContext _dataContext;
 
-        protected TContext DataContext
+        protected virtual TContext DataContext
         {
             get
             {
@@ -29,8 +29,15 @@ namespace Ripl.EF
             _dataContext = dataContext;
         }
 
-        public TEntity AddEntity<TEntity>(TEntity entity) where TEntity : class
+        /// <summary>
+        /// Tracked the added entity. Newly added entities will later be committed to the database on Save.
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="entity">Entity to add.</param>
+        /// <returns></returns>
+        public virtual TEntity AddEntity<TEntity>(TEntity entity) where TEntity : class
         {
+
             EntityEntry<TEntity> result;
 
             result = _dataContext.Add(entity);
@@ -38,9 +45,13 @@ namespace Ripl.EF
             return result?.Entity;
         }
 
-        
-
-        public TEntity UpdateEntityAsync<TEntity>(TEntity entity) where TEntity : class
+        /// <summary>
+        /// Track the modified entity. Updates will later be committed to the database on Save.
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="entity">Entity to update.</param>
+        /// <returns></returns>
+        public virtual TEntity UpdateEntityAsync<TEntity>(TEntity entity) where TEntity : class
         {
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
@@ -52,10 +63,15 @@ namespace Ripl.EF
 
         }
 
-        public async Task<bool> Save(bool dispose = false)
+        /// <summary>
+        /// Saves changes made on the context to the database.
+        /// </summary>
+        /// <param name="dispose">Set to true to dispose the context after saving, otherwise set to false. Default is false.</param>
+        /// <returns></returns>
+        public virtual async Task<bool> Save(bool dispose = false)
         {
             int changes = 0;
-
+            
             using (IDbContextTransaction _transaction = await _dataContext.Database.BeginTransactionAsync().ConfigureAwait(false))
             {
                 try
@@ -66,9 +82,8 @@ namespace Ripl.EF
                     _transaction.Commit();
 
                 }
-                catch (Exception e)
+                catch
                 {
-
                     _transaction.Rollback();
 
                 }
@@ -77,18 +92,11 @@ namespace Ripl.EF
                     if (dispose)
                     {
                         Dispose();
-                    }   
+                    }
                 }
             }
+
             return (changes > 0 ? true : false);
-        }
-
-        public async Task<int> ExecuteCommand(string commandName, params object[] parameters)
-        {
-            int changes = 0;
-
-            changes = await _dataContext.Database.ExecuteSqlCommandAsync(commandName, parameters).ConfigureAwait(false);
-            return changes;
         }
 
         protected virtual void Dispose(bool disposing)
