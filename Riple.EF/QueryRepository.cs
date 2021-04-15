@@ -24,6 +24,9 @@ namespace Ripl.EF
             }
         }
 
+        protected QueryRepository()
+        { }
+
         public QueryRepository(TContext dataContext)
         {
             _dataContext = dataContext;

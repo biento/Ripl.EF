@@ -23,6 +23,8 @@ namespace Ripl.EF
                 return _dataContext;
             }
         }
+        protected CommandRepository()
+        { }
 
         public CommandRepository(TContext dataContext)
         {
