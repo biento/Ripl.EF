@@ -8,4 +8,9 @@ namespace Ripl.EF.Contracts
     {
         long Id { get; set; }
     }
+
+    public interface IEntity<TId>
+    {
+        TId Id { get; set; }
+    }
 }
